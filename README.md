@@ -8,9 +8,13 @@ Initial buying strategy is found here: https://www.investopedia.com/articles/act
 #Todo:
 ## App
 - Build a GUI (https://opensource.com/resources/python/gui-frameworks)
+
 ## API
 - Intergrate backtesting with Zipline
 - Integrate the Investopedia paper trading simulator (https://github.com/kirkthaker/investopedia-trading-api)
 
 ## Algos
 - Implement various algorithms for day trading and selling (https://www.investopedia.com/articles/trading/06/daytradingretail.asp)
+
+## Backtesting
+- Write a backtesting program to check profit for buying and selling AAPL stock on market close and open  

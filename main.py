@@ -1,4 +1,7 @@
 import time
+
+
+#selenium
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -6,10 +9,16 @@ from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import NoAlertPresentException
 import unittest, time, re
+#pandas
+import pandas as pd
+#alpaca api
+import alpaca_trade_api as tradeapi
 
 from stocks import Stock
 from APIKeys import Keys
-import pandas as pd
+from backtesting import backtest
+
+
 
 
 def scrapper():
@@ -53,10 +62,17 @@ def scrapper():
 
    df = pd.DataFrame(data_top_5, columns=['Name', 'Symbol', 'Price', 'Change', 'Change (%)'])
    print(df)
+   driver.close()
 
 keys = Keys()
 #alpaca key
+#specify the paper trading api
+api = tradeapi.REST(keys.alpacaID, keys.alpacaSecret, keys.alpacaEndpoint, 'v2')
+account = api.get_account()
+print("Buying power: " + str(account.buying_power))
+print("Equity: " + str(account.equity))
 
+backtest(api)
 
 #the feeling when everything smoothly functions
 
@@ -68,4 +84,4 @@ keys = Keys()
 # element = driver.find_element_by_class_name("h3")
 
 #scores = find_scores.findall(result) #send in the regex
-driver.close()
+
