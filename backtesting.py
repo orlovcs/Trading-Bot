@@ -6,7 +6,8 @@ import pandas as pd
 
 min_price = 6
 max_price = 26
-stock_held_per_day = 5
+#cannot hold a small amount of stocks for this strategy, they need to balance out
+stock_held_per_day = 150
 
 
 def shares_to_buy(ratings, equity):
@@ -32,13 +33,19 @@ def asset_values(api, assets, on_date, market_open):
       limit = 1,
       end = on_date
    )
+   print_idx = 0
    for symbol in assets:
       if market_open:
          value += assets[symbol] * barset[symbol][0].o
-         print(symbol+": "+str(assets[symbol])+" shares x "+str(barset[symbol][0].o)+" = "+str(assets[symbol] * barset[symbol][0].o))
+         if print_idx < 4:
+            print(symbol+": "+str(assets[symbol])+" shares x "+str(barset[symbol][0].o)+" = "+str(assets[symbol] * barset[symbol][0].o))            
       else:
          value += assets[symbol] * barset[symbol][0].c
-         print(symbol+": "+str(assets[symbol])+" shares x "+str(barset[symbol][0].c)+" = "+str(assets[symbol] * barset[symbol][0].c))
+         if print_idx < 4:
+            print(symbol+": "+str(assets[symbol])+" shares x "+str(barset[symbol][0].c)+" = "+str(assets[symbol] * barset[symbol][0].c))
+      print_idx+=1
+   if print_idx >= 4:
+      print("...")
    return value
 
 
@@ -119,10 +126,14 @@ def rate_deviation(api, request_time):
 
 def backtest(api):
 
-   #starting_cash = input('Backtesting starting cash ')
-   #days_backwards = input('Backtesting days backwards ')
-   equity = float(1000)
-   days_backwards = int(10)
+   starting_cash = input('Backtesting starting cash ')
+   days_backwards = input('Backtesting days backwards ')
+   min_price = input('Stock min price ')
+   max_price = input('Stock max price ')
+
+   equity = float(starting_cash)
+   starting_equity = equity
+   days_backwards = int(days_backwards)
 
 
    now = datetime.now(timezone('EST'))
@@ -133,7 +144,8 @@ def backtest(api):
       start = test_beginning.strftime("%Y-%m-%d"),
       end = now.strftime("%Y-%m-%d")
    )
-   cal_idx = 0
+   day_idx = 0
+   previous_equity = starting_equity
    assets_bought = {}
    for cal in calendars:
       
@@ -147,13 +159,19 @@ def backtest(api):
       print("All assets sold on open for a total of "+str(asset_value))
       equity += asset_value
       print("Portfolio is valued at " + str(equity))
-      print(" ")
+      print("Portfolio change since yesterday is " + str(((equity-previous_equity)/previous_equity)*100.0) + "%")
 
       #2. Calculate which stocks should be bought today
       #Calculate how many shares of each stock should be bought
       ratings = rate_deviation(api, timezone('EST').localize(cal.date))
       assets_bought = shares_to_buy(ratings, equity)
       
+      #record the current profits
+      previous_equity = equity
+      #don't sell on the last day
+      if day_idx == len(calendars) - 1:
+         break
+
       #3. For each stock, buy the appropriate amount of shares and hold it overnight
       for _, row in ratings.iterrows():
          amount_of_shares = assets_bought[row['symbol']]
@@ -163,9 +181,10 @@ def backtest(api):
       asset_value = asset_values(api, assets_bought, cal.date, False)
       print("All assets bought on close for a total of "+str(asset_value))
       print("End of " + str(cal.date))
-
+      print(" ")
+      
       #4. Assets bought today will now be held overnight and sold on market open the next day
-
+      day_idx += 1
    spy_bars = api.get_barset(
       symbols = 'SPY',
       timeframe = 'day',
@@ -174,4 +193,7 @@ def backtest(api):
    )
    print("SPY close on start date: " + str(spy_bars['SPY'][0].c))
    print("SPY close on end date: " + str(spy_bars['SPY'][-1].c))
+   print("Portfolio cash is " + str(equity))
+   print("Portfolio total change is " + str(((equity-starting_equity)/starting_equity)*100.0) + "%")
+
 
