@@ -49,12 +49,15 @@ python3.7 main.py
 ```
 ### Overnight Hold
 
-Currently only the Overnight Hold is available, this strategy looks back a specified amount of days, for each day it will request volume and price bars for a certain amount of stocks. For each applicable stock a rating will be calculated using the normalized momentum of the price changes and standard deviations in volume over the last day. Stocks will then be bought on market close and sold immediately on market open the day after being held overnight.  
+Currently only the Overnight Hold is available, this strategy looks back a specified amount of days, for each day it will request volume and price bars for a certain amount of stocks. For each applicable stock a rating will be calculated using the normalized momentum of the price changes and standard deviations in volume over the last day. Stocks will then be bought on market close and sold immediately on market open the day after being held overnight.
 
+### AAPL Buy Open Sell Close
+
+An ingenious strategy which takes a specified amount of initial cash and a back-testing window and then proceeds to buy the maximum amount of AAPL stocks it can on market open and sell them all off on market close for each day.
 
 ## Todo
 
-See [open issues](https://github.com/orlovcs/Trading-Bot.git/issues).
+See [open issues](https://github.com/orlovcs/Trading-Bot/issues).
 
 
 ## License

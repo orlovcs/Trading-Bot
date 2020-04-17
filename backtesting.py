@@ -49,7 +49,7 @@ def asset_values(api, assets, on_date, market_open):
    return value
 
 
-def rate_deviation(api, request_time):
+def volume_deviation_momentum_ratings(api, request_time):
    #assets available to trade, each object status, symbol, exchange, etc.
    assets = api.list_assets()
    #make sure asset is tradable
@@ -124,7 +124,7 @@ def rate_deviation(api, request_time):
 
 
 
-def backtest(api):
+def overnight_hold(api):
 
    starting_cash = input('Backtesting starting cash ')
    days_backwards = input('Backtesting days backwards ')
@@ -163,7 +163,7 @@ def backtest(api):
 
       #2. Calculate which stocks should be bought today
       #Calculate how many shares of each stock should be bought
-      ratings = rate_deviation(api, timezone('EST').localize(cal.date))
+      ratings = volume_deviation_momentum_ratings(api, timezone('EST').localize(cal.date))
       assets_bought = shares_to_buy(ratings, equity)
       
       #record the current profits
@@ -185,6 +185,8 @@ def backtest(api):
       
       #4. Assets bought today will now be held overnight and sold on market open the next day
       day_idx += 1
+
+
    spy_bars = api.get_barset(
       symbols = 'SPY',
       timeframe = 'day',
@@ -197,3 +199,79 @@ def backtest(api):
    print("Portfolio total change is " + str(((equity-starting_equity)/starting_equity)*100.0) + "%")
 
 
+def aapl_close_open(api):
+
+   starting_cash = input('Backtesting starting cash ')
+   days_backwards = input('Backtesting days backwards ')
+
+   equity = float(starting_cash)
+   starting_equity = equity
+   days_backwards = int(days_backwards)
+
+   now = datetime.now(timezone('EST'))
+   test_beginning = now - timedelta(days=days_backwards)
+
+   #skip over non open market days
+   calendars = api.get_calendar(
+      start = test_beginning.strftime("%Y-%m-%d"),
+      end = now.strftime("%Y-%m-%d")
+   )
+   day_idx = 0
+   previous_equity = starting_equity
+   assets_bought = {}
+   for cal in calendars:
+      
+      #EACH DAY STEPS
+      print("Beginning of " + str(cal.date))
+      
+      #1. Sell off overnight held assets immediately at open market price
+      #Add the profits to our current portfolio
+      asset_value = asset_values(api, assets_bought, cal.date, True)
+      print("Portfolio is " + str(equity))
+      print("Portfolio change since yesterday is " + str(((equity-previous_equity)/previous_equity)*100.0) + "%")
+
+      previous_equity = equity
+
+      #Get AAPL bar for current day
+      on_date = cal.date.strftime('%Y-%m-%dT%H:%M:%S.%f-04:00')
+      barset = api.get_barset(
+         symbols = 'AAPL',
+         timeframe='day',
+         limit = 1,
+         end = on_date
+      )
+      stock_open = barset['AAPL'][0].o
+      stock_close = barset['AAPL'][0].c
+      #Get how many shares we can buy
+      shares_to_buy = int(equity / stock_open)
+      cost_of_shares = stock_open * shares_to_buy
+      assets_bought['AAPL'] = shares_to_buy
+      #Buy all shares on open
+      print("-Buying Open-")
+      equity -= cost_of_shares
+
+      asset_values(api, assets_bought, cal.date, True)
+
+      #Sell off all shares on close
+      print("-Selling Close-")
+      asset_value = asset_values(api, assets_bought, cal.date, False)
+      assets_bought = {}
+
+      equity += asset_value
+      print("Portfolio is " + str(equity))
+      print("Daily change in stock is " + str(((stock_close-stock_open)/stock_open)*100.0) + "%")
+
+      print("End of " + str(cal.date))
+      print(" ")
+
+
+   spy_bars = api.get_barset(
+      symbols = 'SPY',
+      timeframe = 'day',
+      start = (calendars[0].date).strftime('%Y-%m-%dT%H:%M:%S.%f-04:00'),
+      end = (calendars[1].date).strftime('%Y-%m-%dT%H:%M:%S.%f-04:00')
+   )
+   print("SPY close on start date: " + str(spy_bars['SPY'][0].c))
+   print("SPY close on end date: " + str(spy_bars['SPY'][-1].c))
+   print("Portfolio cash is " + str(equity))
+   print("Portfolio total change is " + str(((equity-starting_equity)/starting_equity)*100.0) + "%")

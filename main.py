@@ -16,7 +16,7 @@ import alpaca_trade_api as tradeapi
 
 from stocks import Stock
 from APIKeys import Keys
-from backtesting import backtest
+from backtesting import *
 
 
 
@@ -72,16 +72,6 @@ account = api.get_account()
 print("Buying power: " + str(account.buying_power))
 print("Equity: " + str(account.equity))
 
-backtest(api)
+aapl_close_open(api)
 
 #the feeling when everything smoothly functions
-
-
-# regex_d = re.compile('<a class="Fw(600)">(.+?)</td>')  
-# element = driver.find_element_by_id("content")
-# element = driver.find_element(s)_by_tag_name("div")
-# element = driver.find_element_by_name("contentBox")
-# element = driver.find_element_by_class_name("h3")
-
-#scores = find_scores.findall(result) #send in the regex
-
