@@ -1,20 +1,70 @@
-# Trading Bot
+<h1 align="center">Trading Bot</h1>
 
-Python Trading bot which uses Selenium to scrap stock data.
-Real time paper trading is done with the Alpaca API (https://alpaca.markets/docs/trading-on-alpaca/paper-trading/).
+## Table of Contents
 
-Initial buying strategy is found here: https://www.investopedia.com/articles/active-trading/090415/only-take-trade-if-it-passes-5step-test.asp
+* [About the Project](#about-the-project)
+  * [Built With](#built-with)
+* [Getting Started](#getting-started)
+  * [Prerequisites](#prerequisites)
+  * [Installation](#installation)
+* [Usage](#usage)
 
-#Todo:
-## App
-- Build a GUI (https://opensource.com/resources/python/gui-frameworks)
 
-## API
-- Intergrate backtesting with Zipline
-- Integrate the Investopedia paper trading simulator (https://github.com/kirkthaker/investopedia-trading-api)
+## About The Project
 
-## Algos
-- Implement various algorithms for day trading and selling (https://www.investopedia.com/articles/trading/06/daytradingretail.asp)
+Primarily functioning as a back-testing application, this app helps you test trading algorithms using a paper trading platform, Selenium is currently used to scrap the top gainers stock data.
 
-## Backtesting
-- Write a backtesting program to check profit for buying and selling AAPL stock on market close and open  
+### Built With
+
+* []() Selenium
+* []() Alpaca Python API
+* []() Chrome Driver
+
+### Prerequisites
+
+Install the following pip packages.
+
+* Selenium
+```sh
+pip install selenium
+```
+* alpaca-trade-api-python
+```sh
+pip3 install alpaca-trade-api
+```
+### Installation
+ 
+1. Clone the repo
+```sh
+git clone https://github.com/orlovcs/Trading-Bot.git
+```
+
+## Usage
+
+Rename and input your API keys into APIKeys.py.
+
+Run main.py.
+```sh
+python3.7 main.py
+```
+### Overnight Hold
+
+Currently only the Overnight Hold is available, this strategy looks back a specified amount of days, for each day it will request volume and price bars for a certain amount of stocks. For each applicable stock a rating will be calculated using the normalized momentum of the price changes and standard deviations in volume over the last day. Stocks will then be bought on market close and sold immediately on market open the day after being held overnight.  
+
+
+## Todo
+
+See [open issues](https://github.com/orlovcs/Trading-Bot.git/issues).
+
+
+## License
+
+Distributed under the GPL3 License.
+
+## Acknowledgements
+
+* []() Alpaca Python API for the Overnight Hold strategy
+
+
+
+
